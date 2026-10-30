@@ -9,12 +9,12 @@
 <style>
 :root{--bg:#0d0d0f;--card:#17171b;--ink:#e8e6ee;--mute:#8d8a99;--line:#2e2e36;--acc:#8b5cf6;--accink:#fff;--pip:#a78bfa;color-scheme:dark;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d0d0f;--card:#17171b;--ink:#e8e6ee;--mute:#8d8a99;--line:#2e2e36;--acc:#8b5cf6;--accink:#fff;--pip:#a78bfa;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0d0d0f;--card:#17171b;--ink:#e8e6ee;--mute:#8d8a99;--line:#2e2e36;--acc:#8b5cf6;--accink:#fff;--pip:#a78bfa;color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 Georgia,"Times New Roman",serif}
 main{max-width:900px;margin:0 auto;padding:16px}
 h1{font-size:1.5rem;margin:0}
+h2{font-size:1.1rem;margin:18px 0 8px}
 input,select,textarea,button{font:inherit;color:inherit}
 input,select,textarea{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px;width:100%}
 button{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
@@ -39,61 +39,89 @@ form.open{display:flex}
 label{font-size:.82rem;color:var(--mute)}
 .small{padding:3px 8px;font-size:.8rem}
 .empty{color:var(--mute);text-align:center;padding:30px}
+footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);text-align:center;color:var(--mute);font-size:.85rem}
+.bubble{display:inline-block;border:1px solid var(--acc);color:var(--pip);border-radius:99px;padding:1px 10px;font-size:.75rem;margin-left:8px}
 input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
 button:hover{border-color:var(--acc)}
 @page{margin:10mm}
-@media print{.noprint{display:none!important}body{background:#fff;color:#000;font-size:11px;line-height:1.3}main{max-width:none;padding:0}header{margin-bottom:6px}h1{font-size:1.1rem}header input{border:0;padding:0;max-width:none;background:transparent}.grid{display:block;column-count:2;column-gap:8px}.card{break-inside:avoid;page-break-inside:avoid;margin:0 0 6px;padding:6px 8px;background:#fff;border-color:#999;-webkit-print-color-adjust:exact;print-color-adjust:exact}.card h3{font-size:.95rem}.desc{margin:2px 0}.pips{margin:2px 0}.pip{width:14px;height:14px;border-width:1.5px}.tag{font-size:.7rem;padding:0 5px}}
+@media print{.noprint{display:none!important}body{background:#fff;color:#000;font-size:11px;line-height:1.3}main{max-width:none;padding:0}header{margin-bottom:6px}h1{font-size:1.1rem}header input{border:0;padding:0;max-width:none;background:transparent}.grid{display:block;column-count:2;column-gap:8px}.card{break-inside:avoid;page-break-inside:avoid;margin:0 0 6px;padding:6px 8px;background:#fff;border-color:#999;-webkit-print-color-adjust:exact;print-color-adjust:exact}.card h3{font-size:.95rem}.desc{margin:2px 0}.pips{margin:2px 0}.pip{width:14px;height:14px;border-width:1.5px}.tag{font-size:.7rem;padding:0 5px}footer{display:none}}
 </style>
 </head>
 <body>
 <main>
-<header>
-  <div><h1>⚔️ Action Sheet</h1><div class="meta">Everything your character can do – in one place</div></div>
-  <input id="char" placeholder="Character name / class / level">
-</header>
 
-<div class="bar noprint">
-  <button class="pri" id="add">+ New action</button>
-  <button id="sr">☀️ Short rest</button>
-  <button id="lr">🌙 Long rest</button>
-  <button id="prt">Print</button>
-  <button id="exj">Export backup (JSON)</button>
-  <button id="exm">Export list (Markdown)</button>
-  <button id="imp">Import backup</button>
-  <input id="impf" type="file" accept=".json,application/json" style="display:none">
-</div>
+<section id="home">
+  <header><div><h1>⚔️ Action Sheet</h1><div class="meta">One sheet per character – pick one or start a new one</div></div></header>
+  <div class="bar">
+    <button class="pri" id="new">+ New sheet</button>
+    <button id="exj">Export backup (JSON)</button>
+    <button id="imp">Import backup</button>
+    <input id="impf" type="file" accept=".json,application/json" style="display:none">
+  </div>
+  <form id="nf">
+    <div class="row">
+      <div><label>Character name</label><input id="nn" placeholder="e.g. Elara"></div>
+      <div><label>Class / subclass (optional)</label><input id="nc" placeholder="e.g. Fighter (Champion)"></div>
+      <div><label>Level</label><select id="nl"></select></div>
+    </div>
+    <div class="row"><button class="pri" type="submit">Create sheet</button><button type="button" id="ncancel">Cancel</button></div>
+  </form>
+  <h2>Your sheets</h2>
+  <div class="grid" id="lists"></div>
+</section>
 
-<form id="f" class="noprint">
-  <div class="row">
-    <div><label>Name</label><input id="n" required></div>
-    <div><label>Action type</label>
-      <select id="t"><option>Action</option><option>Bonus Action</option><option>Reaction</option><option>Free Action</option><option>Movement</option><option>Other</option></select></div>
-    <div><label>Source</label>
-      <select id="s"><option>General</option><option>Class</option><option>Race</option><option>Spell</option><option>Feat</option><option>Item</option><option>Weapon</option></select></div>
+<section id="view" hidden>
+  <header>
+    <div><h1>⚔️ Action Sheet</h1><div class="meta" id="vmeta"></div></div>
+    <input id="lname" placeholder="Character name">
+  </header>
+  <div class="bar noprint">
+    <button id="back">← All sheets</button>
+    <button class="pri" id="add">+ New action</button>
+    <button id="sr">☀️ Short rest</button>
+    <button id="lr">🌙 Long rest</button>
+    <button id="prt">Print</button>
+    <button id="exm">Export list (Markdown)</button>
   </div>
-  <div class="row">
-    <div><label>Range / duration</label><input id="r" placeholder="e.g. 60 ft, concentration"></div>
-    <div><label>Attack / saving throw</label><input id="a" placeholder="e.g. +7 or DEX save DC 15"></div>
-    <div><label>Damage / effect</label><input id="d" placeholder="e.g. 1d8+4 slashing"></div>
-  </div>
-  <div class="row">
-    <div><label>Uses (0 = unlimited)</label><input id="u" type="number" min="0" max="20" value="0"></div>
-    <div><label>Recharges on</label><select id="rc"><option value="">–</option><option value="kurz">Short rest</option><option value="lang">Long rest</option></select></div>
-  </div>
-  <div><label>Description / notes</label><textarea id="ds" rows="3"></textarea></div>
-  <div class="row"><button class="pri" type="submit" id="save">Save</button><button type="button" id="cancel">Cancel</button></div>
-</form>
 
-<div class="bar noprint" id="tabs"></div>
-<input id="q" class="noprint" placeholder="Search …" style="margin-bottom:10px">
-<div class="grid" id="list"></div>
+  <form id="f" class="noprint">
+    <div class="row">
+      <div><label>Name</label><input id="n" required></div>
+      <div><label>Action type</label><select id="t"></select></div>
+      <div><label>Source</label>
+        <select id="s"><option>General</option><option>Class</option><option>Race</option><option>Spell</option><option>Feat</option><option>Item</option><option>Weapon</option></select></div>
+    </div>
+    <div class="row">
+      <div><label>Range / duration</label><input id="r" placeholder="e.g. 60 ft, concentration"></div>
+      <div><label>Attack / saving throw</label><input id="a" placeholder="e.g. +7 or DEX save DC 15"></div>
+      <div><label>Damage / effect</label><input id="d" placeholder="e.g. 1d8+4 slashing"></div>
+    </div>
+    <div class="row">
+      <div><label>Uses (0 = unlimited)</label><input id="u" type="number" min="0" max="20" value="0"></div>
+      <div><label>Recharges on</label><select id="rc"><option value="">–</option><option value="kurz">Short rest</option><option value="lang">Long rest</option></select></div>
+    </div>
+    <div><label>Description / notes</label><textarea id="ds" rows="3"></textarea></div>
+    <div class="row"><button class="pri" type="submit">Save</button><button type="button" id="cancel">Cancel</button></div>
+  </form>
+
+  <div class="bar noprint" id="tabs"></div>
+  <input id="q" class="noprint" placeholder="Search …" style="margin-bottom:10px">
+  <div class="grid" id="list"></div>
+</section>
+
+<footer>Made by Ertreuer<span class="bubble">made with AI</span></footer>
 </main>
 
 <script>
-var KEY="dnd-actions-v1";
+var KEY="dnd-actions-v2",OLD="dnd-actions-v1";
 var TYPES=["All","Action","Bonus Action","Reaction","Free Action","Movement","Other"];
-var state={char:"",items:[]},tab="All",editId=null;
-function std(n,t,d){return{id:Math.random().toString(36).slice(2),name:n,type:t,src:"General",range:"",atk:"",dmg:"",uses:0,used:0,rec:"",desc:d}}
+var state={sheets:[]},curId=null,tab="All",editId=null;
+function el(id){return document.getElementById(id)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function uid(){return Math.random().toString(36).slice(2)}
+function S(){return state.sheets.filter(function(l){return l.id==curId})[0]}
+function byId(id){return S().items.filter(function(i){return i.id==id})[0]}
+function std(n,t,d){return{id:uid(),name:n,type:t,src:"General",range:"",atk:"",dmg:"",uses:0,used:0,rec:"",desc:d}}
 function seed(){return[
  std("Attack","Action","Make one melee or ranged attack (more with Extra Attack)."),
  std("Dash","Action","Double your movement speed for this turn."),
@@ -104,16 +132,49 @@ function seed(){return[
  std("Ready","Action","Choose a trigger and a response; uses your reaction."),
  std("Opportunity Attack","Reaction","Melee attack when a foe leaves your reach.")
 ]}
-function load(){try{var r=localStorage.getItem(KEY);if(r){state=JSON.parse(r);return}}catch(e){}state.items=seed()}
+function load(){
+ try{
+  var r=localStorage.getItem(KEY);
+  if(r){state=JSON.parse(r);if(!Array.isArray(state.sheets))state={sheets:[]};return}
+  var o=localStorage.getItem(OLD);
+  if(o){var d=JSON.parse(o);state.sheets=[{id:uid(),name:d.char||"My character",cls:"",level:1,items:d.items||[]}];save()}
+ }catch(e){}
+}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
-function el(id){return document.getElementById(id)}
-function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+el("t").innerHTML=TYPES.slice(1).map(function(t){return"<option>"+t+"</option>"}).join("");
+el("nl").innerHTML=Array.apply(null,Array(20)).map(function(_,i){return'<option value="'+(i+1)+'">Level '+(i+1)+'</option>'}).join("");
 
+/* ---------- home ---------- */
+function renderHome(){
+ el("home").hidden=false;el("view").hidden=true;
+ el("lists").innerHTML=state.sheets.length?state.sheets.map(function(l){
+  return'<div class="card"><h3>'+esc(l.name)+'</h3>'+(l.cls?'<span class="tag">'+esc(l.cls)+'</span>':'')+'<span class="tag">Level '+l.level+'</span><div class="meta">'+l.items.length+' action'+(l.items.length==1?'':'s')+'</div><div style="margin-top:8px"><button class="small pri" data-o="'+l.id+'">Open</button> <button class="small" data-d="'+l.id+'">Delete</button></div></div>'
+ }).join(""):'<div class="empty">No sheets yet. Create your first one with “+ New sheet”.</div>';
+}
+el("new").onclick=function(){el("nn").value="";el("nc").value="";el("nl").value="1";el("nf").classList.add("open");el("nn").focus()};
+el("ncancel").onclick=function(){el("nf").classList.remove("open")};
+el("nf").onsubmit=function(e){
+ e.preventDefault();
+ var v=+el("nl").value,c=el("nc").value.trim();
+ var l={id:uid(),name:el("nn").value.trim()||"New character",cls:c,level:v,items:seed()};
+ state.sheets.push(l);save();el("nf").classList.remove("open");openSheet(l.id);
+};
+el("lists").onclick=function(e){
+ var id;
+ if(id=e.target.getAttribute("data-o"))openSheet(id);
+ else if(id=e.target.getAttribute("data-d")){if(confirm("Really delete this sheet?")){state.sheets=state.sheets.filter(function(l){return l.id!=id});save();renderHome()}}
+};
+
+/* ---------- sheet view ---------- */
+function openSheet(id){curId=id;tab="All";el("q").value="";el("f").classList.remove("open");render();window.scrollTo(0,0)}
+el("back").onclick=function(){curId=null;renderHome()};
 function render(){
- el("char").value=state.char||"";
- el("tabs").innerHTML=TYPES.map(function(t){var c=t=="All"?state.items.length:state.items.filter(function(i){return i.type==t}).length;return'<button class="tab'+(t==tab?' on':'')+'" data-t="'+t+'">'+t+' ('+c+')</button>'}).join("");
+ var l=S();if(!l){renderHome();return}
+ el("home").hidden=true;el("view").hidden=false;
+ el("lname").value=l.name;el("vmeta").textContent=(l.cls?l.cls+" · ":"")+"Level "+l.level;
+ el("tabs").innerHTML=TYPES.map(function(t){var c=t=="All"?l.items.length:l.items.filter(function(i){return i.type==t}).length;return'<button class="tab'+(t==tab?' on':'')+'" data-t="'+t+'">'+t+' ('+c+')</button>'}).join("");
  var q=el("q").value.toLowerCase();
- var items=state.items.filter(function(i){return(tab=="All"||i.type==tab)&&(!q||(i.name+i.desc+i.src).toLowerCase().indexOf(q)>-1)});
+ var items=l.items.filter(function(i){return(tab=="All"||i.type==tab)&&(!q||(i.name+i.desc+i.src).toLowerCase().indexOf(q)>-1)});
  el("list").innerHTML=items.length?items.map(function(i){
   var pips="";
   if(i.uses>0){pips='<div class="pips">';for(var k=0;k<i.uses;k++)pips+='<button class="pip'+(k<i.used?' used':'')+'" data-p="'+i.id+'" data-k="'+k+'" aria-label="Use"></button>';pips+='</div>'}
@@ -134,54 +195,52 @@ el("f").onsubmit=function(e){
  e.preventDefault();
  var o={name:el("n").value.trim(),type:el("t").value,src:el("s").value,range:el("r").value,atk:el("a").value,dmg:el("d").value,uses:Math.max(0,parseInt(el("u").value)||0),rec:el("rc").value,desc:el("ds").value};
  if(!o.name)return;
- if(editId){var it=state.items.filter(function(i){return i.id==editId})[0];var keep=it.used;Object.assign(it,o);it.used=Math.min(keep,it.uses)}
- else{o.id=Math.random().toString(36).slice(2);o.used=0;state.items.push(o)}
+ if(editId){var it=byId(editId),keep=it.used;Object.assign(it,o);it.used=Math.min(keep,it.uses)}
+ else{o.id=uid();o.used=0;S().items.push(o)}
  save();el("f").classList.remove("open");render();
 };
 el("tabs").onclick=function(e){var t=e.target.getAttribute("data-t");if(t){tab=t;render()}};
 el("q").oninput=render;
-el("char").oninput=function(){state.char=this.value;save()};
+el("lname").oninput=function(){S().name=this.value;save()};
 el("list").onclick=function(e){
  var b=e.target,id;
- if(id=b.getAttribute("data-p")){var it=state.items.filter(function(i){return i.id==id})[0];var k=+b.getAttribute("data-k");it.used=(k<it.used)?k:k+1;save();render()}
- else if(id=b.getAttribute("data-e")){openForm(state.items.filter(function(i){return i.id==id})[0]);window.scrollTo(0,0)}
- else if(id=b.getAttribute("data-x")){if(confirm("Really delete?")){state.items=state.items.filter(function(i){return i.id!=id});save();render()}}
+ if(id=b.getAttribute("data-p")){var it=byId(id),k=+b.getAttribute("data-k");it.used=(k<it.used)?k:k+1;save();render()}
+ else if(id=b.getAttribute("data-e")){openForm(byId(id));window.scrollTo(0,0)}
+ else if(id=b.getAttribute("data-x")){if(confirm("Really delete?")){S().items=S().items.filter(function(i){return i.id!=id});save();render()}}
 };
-function rest(kind){state.items.forEach(function(i){if(i.rec=="kurz"||(kind=="lang"&&i.rec=="lang"))i.used=0});save();render()}
+function rest(kind){S().items.forEach(function(i){if(i.rec=="kurz"||(kind=="lang"&&i.rec=="lang"))i.used=0});save();render()}
 el("sr").onclick=function(){rest("kurz")};
 el("lr").onclick=function(){rest("lang")};
 el("prt").onclick=function(){tab="All";el("q").value="";render();window.print()};
+
+/* ---------- export / import ---------- */
 function dlLocal(name,data){
- try{
-  var b=new Blob([data],{type:"text/plain;charset=utf-8"}),u=URL.createObjectURL(b),a=document.createElement("a");
+ try{var b=new Blob([data],{type:"text/plain;charset=utf-8"}),u=URL.createObjectURL(b),a=document.createElement("a");
   a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);
-  setTimeout(function(){URL.revokeObjectURL(u)},1000);
- }catch(e){alert("Export failed.")}
+  setTimeout(function(){URL.revokeObjectURL(u)},1000)}catch(e){alert("Export failed.")}
 }
 function dl(name,data){
  var p=(window.claude&&window.claude.use)?window.claude.use("downloads"):null;
  if(!p){dlLocal(name,data);return}
- p.then(function(d){
-  if(!d){dlLocal(name,data);return}
-  return d.save({filename:name,data:data});
- }).catch(function(e){if(!e||e.code!=="declined")alert("Export failed: "+((e&&e.message)||e))});
+ p.then(function(d){if(!d){dlLocal(name,data);return}return d.save({filename:name,data:data})})
+  .catch(function(e){if(!e||e.code!=="declined")alert("Export failed: "+((e&&e.message)||e))});
 }
-function fname(ext){var b=(state.char||"dnd-actions").replace(/[^\w\-]+/g,"-").replace(/^-+|-+$/g,"")||"dnd-actions";return b+"."+ext}
+function fname(b,ext){b=String(b||"").replace(/[^\w\-]+/g,"-").replace(/^-+|-+$/g,"")||"dnd-actions";return b+"."+ext}
 function md(){
- var o="# "+(state.char||"D&D Action Sheet")+"\n";
+ var l=S(),o="# "+l.name+"\n\n"+(l.cls?l.cls+" · ":"")+"Level "+l.level+"\n";
  TYPES.slice(1).forEach(function(t){
-  var l=state.items.filter(function(i){return i.type==t});
-  if(!l.length)return;
+  var a=l.items.filter(function(i){return i.type==t});
+  if(!a.length)return;
   o+="\n## "+t+"\n";
-  l.forEach(function(i){
+  a.forEach(function(i){
    var m=[i.range,i.atk,i.dmg].filter(Boolean).join(" · ");
    o+="\n- **"+i.name+"** ("+i.src+")"+(m?" – "+m:"")+(i.uses?" – "+i.uses+" use(s)"+(i.rec?", "+(i.rec=="kurz"?"short":"long")+" rest":""):"")+(i.desc?"\n  "+i.desc.replace(/\n/g,"\n  "):"");
   });
  });
  return o+"\n";
 }
-el("exj").onclick=function(){dl(fname("json"),JSON.stringify(state,null,2))};
-el("exm").onclick=function(){dl(fname("md"),md())};
+el("exj").onclick=function(){dl("dnd-action-sheets.json",JSON.stringify(state,null,2))};
+el("exm").onclick=function(){dl(fname(S().name,"md"),md())};
 el("imp").onclick=function(){el("impf").click()};
 el("impf").onchange=function(){
  var f=this.files&&this.files[0];this.value="";
@@ -190,15 +249,15 @@ el("impf").onchange=function(){
  r.onload=function(){
   try{
    var d=JSON.parse(r.result);
-   if(!d||!Array.isArray(d.items))throw new Error("bad file");
-   if(!confirm("Replace your current sheet with the imported one?"))return;
-   state={char:String(d.char||""),items:d.items};
-   save();render();
+   if(d&&Array.isArray(d.items))d={sheets:[{id:uid(),name:d.char||"Imported character",cls:"",level:1,items:d.items}]};
+   if(!d||!Array.isArray(d.sheets))throw new Error("bad file");
+   if(!confirm("Replace all your sheets with the imported ones?"))return;
+   state={sheets:d.sheets};curId=null;save();renderHome();
   }catch(e){alert("That file isn’t a valid backup.")}
  };
  r.readAsText(f);
 };
-load();render();
+load();renderHome();
 </script>
 </body>
 </html>
