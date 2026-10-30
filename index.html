@@ -44,7 +44,7 @@ footer{margin-top:36px;padding-top:14px;border-top:1px solid var(--line);text-al
 input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
 button:hover{border-color:var(--acc)}
 @page{margin:0}
-@media print{.noprint{display:none!important}body{background:#fff;color:#000;font-size:11px;line-height:1.3}main{max-width:none;padding:10mm}header{margin-bottom:6px}h1{font-size:1.1rem}header input{border:0;padding:0;max-width:none;background:transparent}.grid{display:block;column-count:2;column-gap:8px}.card{break-inside:avoid;page-break-inside:avoid;margin:0 0 6px;padding:6px 8px;background:#fff;border-color:#999;-webkit-print-color-adjust:exact;print-color-adjust:exact}.card h3{font-size:.95rem}.desc{margin:2px 0}.pips{margin:2px 0}.pip{width:14px;height:14px;border-width:1.5px}.tag{font-size:.7rem;padding:0 6px;border:0;background:#eee;-webkit-print-color-adjust:exact;print-color-adjust:exact}footer{display:none}}
+@media print{.noprint{display:none!important}body{background:#fff;color:#000;font-size:11px;line-height:1.3}main{max-width:none;padding:10mm}header{margin-bottom:6px}h1{font-size:1.1rem}header input{border:0;padding:0;max-width:none;background:transparent}.grid{display:block;column-count:2;column-gap:8px}.card{display:inline-block;width:100%;vertical-align:top;break-inside:avoid;page-break-inside:avoid;-webkit-column-break-inside:avoid;margin:0 0 6px;padding:6px 8px;background:#fff;border-color:#999;-webkit-print-color-adjust:exact;print-color-adjust:exact}.card h3{font-size:.95rem}.desc{margin:2px 0}.pips{margin:2px 0}.pip{width:14px;height:14px;border-width:1.5px}.tag{font-size:.7rem;padding:0 6px;border:0;background:#eee;-webkit-print-color-adjust:exact;print-color-adjust:exact}footer{display:none}}
 </style>
 </head>
 <body>
@@ -81,6 +81,7 @@ button:hover{border-color:var(--acc)}
     <button id="sr">☀️ Short rest</button>
     <button id="lr">🌙 Long rest</button>
     <button id="prt">Print</button>
+    <button id="pdf" title="Opens the print dialog. Choose &quot;Save as PDF&quot; as the destination.">Save as PDF</button>
     <button id="exm">Export list (Markdown)</button>
   </div>
 
@@ -211,7 +212,8 @@ el("list").onclick=function(e){
 function rest(kind){S().items.forEach(function(i){if(i.rec=="kurz"||(kind=="lang"&&i.rec=="lang"))i.used=0});save();render()}
 el("sr").onclick=function(){rest("kurz")};
 el("lr").onclick=function(){rest("lang")};
-el("prt").onclick=function(){tab="All";el("q").value="";render();window.print()};
+function doPrint(){tab="All";el("q").value="";render();var t=document.title;document.title=(S()?S().name+" - ":"")+"D&D Action Sheet";window.print();document.title=t}
+el("prt").onclick=doPrint;el("pdf").onclick=doPrint;
 
 /* ---------- export / import ---------- */
 function dlLocal(name,data){
