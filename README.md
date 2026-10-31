@@ -24,6 +24,10 @@ A simple, single-file action tracker for your Dungeons & Dragons character. Keep
 
 That's it. The whole app is one HTML file with no external dependencies.
 
+Or
+
+1. Open https://ertreuer.github.io/DnD-5e-Action-Sheet/ and start with How to use
+
 ## How to use
 
 ### Add an action
